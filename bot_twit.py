@@ -44,9 +44,13 @@ options.add_argument(
 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
 )
 
-# iniciar navegador
+# iniciar Chrome en servidores
+service = Service(ChromeDriverManager().install())
+
+options.binary_location = "/usr/bin/chromium"
+
 driver = webdriver.Chrome(
-    service=Service(ChromeDriverManager().install()),
+    service=service,
     options=options
 )
 
@@ -167,6 +171,7 @@ while True:
     print("Esperando",espera,"segundos")
 
     time.sleep(espera)
+
 
 
 
