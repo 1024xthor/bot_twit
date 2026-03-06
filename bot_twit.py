@@ -1,169 +1,133 @@
-# BOT TWITTER MULTIIDIOMA
+# ==============================
+# BOT TWITTER / X AUTOMÁTICO
+# Compatible con Render
+# ==============================
 
 import time
 import random
 
+# librerías selenium
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+# webdriver manager descarga el driver automáticamente
+from webdriver_manager.chrome import ChromeDriverManager
 
-# CONFIGURACIÓN CHROME
+
+# ==============================
+# CONFIGURACIÓN DE CHROME
+# ==============================
+
 options = webdriver.ChromeOptions()
 
-options.add_argument("--start-maximized")  
-# abre el navegador maximizado
+# modo headless necesario para servidores (sin interfaz gráfica)
+options.add_argument("--headless")
 
-options.add_argument("--disable-blink-features=AutomationControlled")  
-# oculta que el navegador está controlado por selenium
+# evita errores en servidores linux
+options.add_argument("--no-sandbox")
 
-options.add_experimental_option("excludeSwitches", ["enable-automation"])  
-# quita aviso de automatización
+# evita errores de memoria
+options.add_argument("--disable-dev-shm-usage")
 
-options.add_experimental_option("useAutomationExtension", False)  
-# desactiva extensión automática de selenium
+# desactiva gpu
+options.add_argument("--disable-gpu")
 
-options.add_argument(r"user-data-dir=C:\botchrome")  
-# usa tu sesión real de chrome para no loguearte cada vez
+# tamaño de ventana
+options.add_argument("--window-size=1920,1080")
 
 
+# iniciar navegador
 driver = webdriver.Chrome(
     service=Service(ChromeDriverManager().install()),
     options=options
 )
 
-wait = WebDriverWait(driver,20)
-# espera inteligente hasta 20 segundos para encontrar elementos
 
+# ==============================
+# MENSAJES DEL BOT
+# ==============================
 
-# MENSAJES PRINCIPALES
 mensajes = [
 
-# Español
 "Visita mi sitio web. Soluciones web accesibles para emprendedores.",
-
-# Inglés
 "Visit my website. Affordable web solutions for entrepreneurs.",
-
-# Alemán
-"Besuchen Sie meine Website. Günstige Webseiten für Unternehmer.",
-
-# Francés
-"Visitez mon site. Solutions web abordables pour entrepreneurs.",
-
-# Portugués
+"Visitez mon site web. Solutions web abordables pour entrepreneurs.",
+"Besuchen Sie meine Website. Weblösungen für Unternehmer.",
 "Visite meu site. Soluções web acessíveis para empreendedores.",
-"Crie sua presença online hoje. Soluções web acessíveis para empreendedores.",
+"Visita il mio sito web. Soluzioni web economiche per imprenditori."
 
-# Italiano
-"Visita il mio sito web. Soluzioni web economiche per imprenditori.",
-
-# Hindi (Indio)
-"मेरी वेबसाइट देखें। उद्यमियों के लिए किफायती वेब समाधान।",
-"अपना ऑनलाइन व्यवसाय शुरू करें। किफायती वेबसाइट समाधान।"
 ]
 
 
-# FRASES EXTRA
-extras = [
+# ==============================
+# ABRIR TWITTER
+# ==============================
 
-"Crece tu negocio online.",
-"Start your digital business today.",
-"Modern websites for modern entrepreneurs.",
-"Tu negocio merece presencia digital.",
-"Build your brand online.",
-"Impulsa tu emprendimiento."
-]
+print("Abriendo X / Twitter...")
 
+driver.get("https://x.com/home")
 
-# HASHTAGS
-hashtags = [
-
-"#webdev",
-"#webdesign",
-"#startup",
-"#entrepreneur",
-"#digitalbusiness",
-"#programming",
-"#tech",
-"#coding",
-"#marketing",
-"#onlinebusiness"
-]
+# esperar que cargue la página
+time.sleep(10)
 
 
-# FUNCIÓN PUBLICAR
+# ==============================
+# FUNCIÓN PUBLICAR TWEET
+# ==============================
+
 def publicar():
 
-    # genera tweet aleatorio para evitar duplicados
-    tweet = (
-        random.choice(mensajes) + " " +
-        random.choice(extras) + " " +
-        random.choice(hashtags) + " " +
-        random.choice(hashtags) + " " +
-        str(random.randint(1000,9999))
-    )
+    try:
 
-    print("Abriendo X...")
+        # elegir mensaje aleatorio
+        tweet = random.choice(mensajes)
 
-    driver.get("https://x.com/home")
+        wait = WebDriverWait(driver,20)
 
-    time.sleep(7)  
-    # espera a que cargue completamente
+        # buscar caja de tweet
+        caja = wait.until(
 
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR,'div[data-testid="tweetTextarea_0"]')
+            )
 
-    print("Buscando caja del tweet...")
+        )
 
-    caja = wait.until(
-        EC.presence_of_element_located((By.CSS_SELECTOR,'div[data-testid="tweetTextarea_0"]'))
-    )
+        # escribir tweet
+        caja.send_keys(tweet)
 
-    driver.execute_script("arguments[0].focus();", caja)
-    # enfoca la caja sin usar click (evita errores)
+        # esperar un poco
+        time.sleep(2)
 
-    time.sleep(1)
+        # botón publicar
+        boton = driver.find_element(By.CSS_SELECTOR,'div[data-testid="tweetButtonInline"]')
 
-    caja.send_keys(tweet)
-    # escribe el tweet
+        boton.click()
 
+        print("Tweet enviado:", tweet)
 
-    print("Buscando botón publicar...")
+    except Exception as e:
 
-    boton = wait.until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR,'button[data-testid="tweetButtonInline"]'))
-    )
-
-    driver.execute_script("arguments[0].scrollIntoView(true);", boton)
-    # mueve la pantalla hasta el botón
-
-    driver.execute_script("arguments[0].click();", boton)
-    # click forzado con javascript
+        print("Error al publicar:", e)
 
 
-    print("✅ Tweet publicado:", tweet)
-
-
-
-# LOOP INFINITO
-print("Bot iniciado")
+# ==============================
+# BUCLE DEL BOT
+# ==============================
 
 while True:
 
     publicar()
 
-    espera = random.randint(90,180)  # entre 1.5 y 3 horas
+    # tiempo aleatorio entre tweets
+    espera = random.randint(3600,7200)  # entre 1 y 2 horas
 
-    print("Esperando", round(espera/60), "minutos")
+    print("Esperando",espera,"segundos para el próximo tweet")
 
-    time.sleep(espera * 60)  # convierte minutos a segundos
-    #espera = 2  # minutos (modo prueba)
-
-    #print("Esperando", espera, "minutos")
-
-    #time.sleep(espera * 60)  # convierte minutos a segundos
+    time.sleep(espera)
     
+
 
