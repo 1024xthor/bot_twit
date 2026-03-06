@@ -1,23 +1,44 @@
-# =====================================
-# BOT TWITTER / X PARA RENDER
-# SIN SELENIUM
-# =====================================
+# =========================================
+# BOT TWITTER PARA RENDER FREE
+# =========================================
 
 import requests
 import random
 import time
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# =====================================
-# COOKIES DE SESIÓN
-# =====================================
+
+# =========================================
+# SERVIDOR WEB FALSO (para Render)
+# =========================================
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"bot running")
+
+def start_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), Handler)
+    server.serve_forever()
+
+threading.Thread(target=start_server).start()
+
+
+# =========================================
+# COOKIES DE SESION
+# =========================================
 
 auth_token = os.getenv("AUTH_TOKEN")
 ct0 = os.getenv("CT0")
 
-# =====================================
+
+# =========================================
 # MENSAJES DEL BOT
-# =====================================
+# =========================================
 
 mensajes = [
 
@@ -35,9 +56,10 @@ mensajes = [
 
 ]
 
-# =====================================
-# CABECERAS HTTP
-# =====================================
+
+# =========================================
+# HEADERS PARA X
+# =========================================
 
 headers = {
 "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAA",
@@ -50,9 +72,10 @@ cookies = {
 "ct0": ct0
 }
 
-# =====================================
-# FUNCIÓN PUBLICAR TWEET
-# =====================================
+
+# =========================================
+# PUBLICAR TWEET
+# =========================================
 
 def publicar():
 
@@ -66,12 +89,13 @@ def publicar():
 
     r = requests.post(url, headers=headers, cookies=cookies, data=data)
 
-    print("Respuesta:", r.status_code)
+    print("Status:", r.status_code)
     print("Tweet:", tweet)
 
-# =====================================
-# BUCLE DEL BOT
-# =====================================
+
+# =========================================
+# LOOP DEL BOT
+# =========================================
 
 while True:
 
