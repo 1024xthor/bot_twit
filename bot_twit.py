@@ -1,176 +1,88 @@
-# ===============================
-# BOT TWITTER / X PARA SERVIDORES
-# Compatible con Render
-# ===============================
+# =====================================
+# BOT TWITTER / X PARA RENDER
+# SIN SELENIUM
+# =====================================
 
-import time
+import requests
 import random
+import time
 import os
 
-# selenium
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+# =====================================
+# COOKIES DE SESIÓN
+# =====================================
 
-# descarga automática del driver
-from webdriver_manager.chrome import ChromeDriverManager
-
-
-# ===============================
-# CONFIGURACIÓN DE CHROME
-# ===============================
-
-options = webdriver.ChromeOptions()
-
-# modo headless obligatorio en servidores (sin interfaz gráfica)
-options.add_argument("--headless=new")
-
-# evita errores de permisos en contenedores
-options.add_argument("--no-sandbox")
-
-# evita errores de memoria
-options.add_argument("--disable-dev-shm-usage")
-
-# desactiva GPU
-options.add_argument("--disable-gpu")
-
-# tamaño de ventana virtual
-options.add_argument("--window-size=1920,1080")
-
-# user agent para que el navegador parezca real
-options.add_argument(
-"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
-)
-
-# iniciar Chrome en servidores
-service = Service(ChromeDriverManager().install())
-
-options.binary_location = "/usr/bin/chromium"
-
-driver = webdriver.Chrome(
-    service=service,
-    options=options
-)
-
-
-# ===============================
-# MENSAJES DEL BOT
-# ===============================
-
-mensajes = [
-
-"Visita mi sitio web. Soluciones web accesibles para emprendedores.",
-"Visit my website. Affordable web solutions for entrepreneurs.",
-"Visitez mon site web. Solutions web abordables pour entrepreneurs.",
-"Besuchen Sie meine Website. Weblösungen für Unternehmer.",
-"Visite meu site. Soluções web acessíveis para empreendedores.",
-"Visita il mio sito web. Soluzioni web economiche per imprenditori."
-
-]
-
-
-# ===============================
-# COOKIES DE SESIÓN (opcional)
-# ===============================
-
-# se leen desde variables de entorno de Render
 auth_token = os.getenv("AUTH_TOKEN")
 ct0 = os.getenv("CT0")
 
+# =====================================
+# MENSAJES DEL BOT
+# =====================================
 
-# ===============================
-# ABRIR X / TWITTER
-# ===============================
+mensajes = [
 
-print("Abriendo X...")
+"Visita mi sitio web. Soluciones web accesibles para emprendedores. #web #emprendedores",
 
-driver.get("https://x.com")
+"Visit my website. Affordable web solutions for entrepreneurs. #startup #webdev",
 
-time.sleep(5)
+"Visitez mon site web. Solutions web abordables pour entrepreneurs. #business #marketing",
 
+"Besuchen Sie meine Website. Weblösungen für Unternehmer. #startup #digital",
 
-# ===============================
-# CARGAR COOKIES SI EXISTEN
-# ===============================
+"Visite meu site. Soluções web acessíveis para empreendedores. #negocios #web",
 
-if auth_token and ct0:
+"Visita il mio sito web. Soluzioni web economiche per imprenditori. #startup #business"
 
-    print("Cargando cookies de sesión")
+]
 
-    driver.add_cookie({
-        "name": "auth_token",
-        "value": auth_token,
-        "domain": ".x.com",
-        "path": "/"
-    })
+# =====================================
+# CABECERAS HTTP
+# =====================================
 
-    driver.add_cookie({
-        "name": "ct0",
-        "value": ct0,
-        "domain": ".x.com",
-        "path": "/"
-    })
+headers = {
+"authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAA",
+"x-csrf-token": ct0,
+"content-type": "application/json"
+}
 
-    # recargar página con sesión
-    driver.get("https://x.com/home")
+cookies = {
+"auth_token": auth_token,
+"ct0": ct0
+}
 
-    time.sleep(5)
-
-
-# ===============================
+# =====================================
 # FUNCIÓN PUBLICAR TWEET
-# ===============================
+# =====================================
 
 def publicar():
 
-    try:
+    tweet = random.choice(mensajes)
 
-        tweet = random.choice(mensajes)
+    url = "https://api.twitter.com/1.1/statuses/update.json"
 
-        wait = WebDriverWait(driver,20)
+    data = {
+        "status": tweet
+    }
 
-        # caja de tweet
-        caja = wait.until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR,'div[data-testid="tweetTextarea_0"]')
-            )
-        )
+    r = requests.post(url, headers=headers, cookies=cookies, data=data)
 
-        caja.send_keys(tweet)
+    print("Respuesta:", r.status_code)
+    print("Tweet:", tweet)
 
-        time.sleep(2)
-
-        # botón publicar
-        boton = driver.find_element(
-            By.CSS_SELECTOR,
-            'div[data-testid="tweetButtonInline"]'
-        )
-
-        boton.click()
-
-        print("Tweet enviado:", tweet)
-
-    except Exception as e:
-
-        print("Error publicando:", e)
-
-
-# ===============================
+# =====================================
 # BUCLE DEL BOT
-# ===============================
+# =====================================
 
 while True:
 
     publicar()
 
-    # espera entre 1 y 2 horas
     espera = random.randint(3600,7200)
 
-    print("Esperando",espera,"segundos")
+    print("Esperando", espera, "segundos")
 
     time.sleep(espera)
+
 
 
 
