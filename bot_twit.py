@@ -1,56 +1,64 @@
 import os
 import random
 import tweepy
+import time
+from dotenv import load_dotenv
 
-# CONFIGURACIÓN DE LLAVES (GitHub las pondrá aquí)
+# 1. Cargamos las variables del archivo .env (Local) o Secrets (GitHub)
+load_dotenv()
+
+# 2. Configuración de las 4 llaves que tienes en tu escritorio
 API_KEY = os.getenv('API_KEY')
 API_SECRET = os.getenv('API_SECRET')
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
-BEARER_TOKEN = os.getenv('BEARER_TOKEN')
 
-# MENSAJES
+# 3. Listas de mensajes multilingües
 mensajes = [
-    "Visita mi sitio web. Soluciones web accesibles para emprendedores.",
-    "Visit my website. Affordable web solutions for entrepreneurs.",
-    "Besuchen Sie meine Website. Günstige Webseiten für Unternehmer.",
-    "Visitez mon site. Solutions web abordables pour entrepreneurs.",
-    "Visite meu site. Soluções web acessíveis para empreendedores.",
-    "Visita il mio sito web. Soluzioni web economiche per imprenditori.",
-    "मेरी वेबसाइट देखें। उद्यमियों के लिए किफायती वेब समाधान।"
+    "Visita mi sitio web. Soluciones web accesibles.", # Español
+    "Visit my website. Affordable web solutions.",     # Inglés
+    "Besuchen Sie meine Website. Günstige Webseiten.", # Alemán
+    "Visitez mon site. Solutions web abordables.",    # Francés
+    "Visite meu site. Soluções web acessíveis.",      # Portugués
+    "Visita il mio sito web. Soluzioni economiche.",   # Italiano
+    "मेरी वेबसाइट देखें। किफायती वेब समाधान।"          # Hindi
 ]
 
-extras = ["Crece tu negocio online.", "Start your digital business today.", "Impulsa tu emprendimiento."]
-hashtags = ["#webdev", "#webdesign", "#startup", "#entrepreneur", "#digitalbusiness"]
+extras = [
+    "Crece tu negocio online.", 
+    "Start your digital business today.", 
+    "Impulsa tu emprendimiento.",
+    "Soluciones profesionales."
+]
 
-def publicar():
+hashtags = ["#webdev", "#webdesign", "#startup", "#entrepreneur", "#coding", "#tech"]
+
+def publicar_tweet():
     try:
-        # Autenticación con la API v2 de Twitter
+        # Forzamos API v2 (la única que el plan Free tolera un poco)
         client = tweepy.Client(
-            bearer_token=BEARER_TOKEN,
             consumer_key=API_KEY,
             consumer_secret=API_SECRET,
             access_token=ACCESS_TOKEN,
             access_token_secret=ACCESS_TOKEN_SECRET
         )
 
-        # Generar tweet aleatorio
-        tweet = (
-            random.choice(mensajes) + " " +
-            random.choice(extras) + " " +
-            random.choice(hashtags) + " " +
-            str(random.randint(1000, 9999))
+        texto_tweet = (
+            f"{random.choice(mensajes)} {random.choice(extras)} "
+            f"{random.choice(hashtags)} {random.randint(1000, 9999)}"
         )
 
-        # Publicar
-        client.create_tweet(text=tweet)
-        print(f"✅ Tweet publicado: {tweet}")
+        client.create_tweet(text=texto_tweet)
+        print(f"✅ ¡EN LA NUBE SÍ! Tweet enviado: {texto_tweet}")
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Error en GitHub: {e}")
 
 if __name__ == "__main__":
-    publicar()
+    # Si lo corres en VS Code, puedes probar un ciclo, 
+    # pero en GitHub el tiempo lo manda el archivo YAML (cada hora).
+    publicar_tweet()
+
 
 
 
