@@ -36,11 +36,13 @@ hashtags = ["#SayanFitness", "#FitnessApp", "#Fitness", "#Workout", "#Gym", "#An
 
 def publicar_tweet():
     try:
-        # Autenticación con API v1.1 (OAuth 1.0a - 100% GRATIS)
-        auth = tweepy.OAuth1UserHandler(
-            API_KEY, API_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+        # Autenticación obligatoria API v2
+        client = tweepy.Client(
+            consumer_key=API_KEY,
+            consumer_secret=API_SECRET,
+            access_token=ACCESS_TOKEN,
+            access_token_secret=ACCESS_TOKEN_SECRET
         )
-        api = tweepy.API(auth)
 
         texto_tweet = (
             f"{random.choice(mensajes)}\n\n"
@@ -48,9 +50,12 @@ def publicar_tweet():
             f"{random.choice(hashtags)} {random.choice(hashtags)} #{random.randint(1000, 9999)}"
         )
 
-        # Método de publicación gratuito
-        api.update_status(status=texto_tweet)
+        # Publicación mediante API v2
+        client.create_tweet(text=texto_tweet)
         print(f"✅ Tweet enviado con éxito:\n{texto_tweet}")
+
+    except Exception as e:
+        print(f"❌ Error al enviar el tweet: {e}")
 
     except Exception as e:
         print(f"❌ Error al enviar el tweet: {e}")
